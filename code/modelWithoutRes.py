@@ -46,9 +46,8 @@ LOG_DIR = './data_set/logs'
 INPUT_IMG_HEIGHT, INPUT_IMG_WIDE, INPUT_IMG_CHANNEL = 256, 128, 1
 OUTPUT_IMG_HEIGHT, OUTPUT_IMG_WIDE, OUTPUT_IMG_CHANNEL = 256, 128, 1
 
-TEST_SET_NAME1='HIMap_RSG7M_A1_24_MP_PXX_Z0_C0-M9703A_DPUA_20160321_001403_deal.h5'
 TRAIN_SET_NAME = 'train_set.tfrecords'
-VALIDATION_SET_NAME = 'real_tod_with_mask.h5'
+VALIDATION_SET_NAME = 'predict_20180530_seek.h5'
 TEST_SET_NAME = 'test_set.h5'
 
 def read_image(file_queue):
@@ -423,7 +422,6 @@ class RFI_Gan:
 
         if model_file_path is None:
             model_file_path = os.path.join(MODEL_DIR, model_name)
-        # DATA_DIR = '../data_set/'VALIDATION_SET_NAME = 'validation_set.tfrecords'
         if validation_file_path is None:
             validation_file_path = os.path.join(DATA_DIR, VALIDATION_SET_NAME)
 
@@ -431,7 +429,7 @@ class RFI_Gan:
             validation_result_path = VALIDATION_RESULT_DIRECTORY
         if not os.path.lexists(validation_result_path):
             os.makedirs(validation_result_path)
-        validation_result_path = os.path.join(VALIDATION_RESULT_DIRECTORY, 'validation_result.h5')
+        validation_result_path = os.path.join(VALIDATION_RESULT_DIRECTORY, 'predict_20180530_seek.h5')
         file_to_read = h5.File(validation_file_path, 'r')
         file_to_write = h5.File(validation_result_path, 'w')
 
@@ -468,7 +466,7 @@ class RFI_Gan:
                                              self.keep_prob: 1.0,
                                              self.lamb: 0.004, self.is_traing: False})
 
-                img = np.squeeze(images[0]) > 0.5
+                img = np.squeeze(images) > 0.5
                 # img=img.astype(int)
                 cv2.imwrite(os.path.join(VALIDATION_RESULT_DIRECTORY, '%d_temp.jpg' % index), img * 255)  # * 255
                 img = img.astype(int)
@@ -580,44 +578,11 @@ class RFI_Gan:
 
 def main():
     net = RFI_Gan()
-    # net.set_up_net(TRAIN_BATCH_SIZE)
-    # net.train()
-    #
+    net.train()
     # net.test()
-    net.roc()
-    # net.test(model_file_path="./data_set/saved_models/rfi_net/model.ckpt")
 
     # net.validate()
 
-    # net.set_up_net(TEST_BATCH_SIZE)
-    # net.test_time(test_batch_size=1, test_size=76, height=256, wide=128)
-    # net.set_up_net(PREDICT_BATCH_SIZE)
-    # net.predict()
-
-
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    # data path
-    parser.add_argument(
-        '--data_dir', type=str, default=DATA_DIR,
-        help='Directory for storing input data_set')
-
-    # model saved into
-    parser.add_argument(
-        '--model_dir', type=str, default=MODEL_DIR,
-        help='output model path')
-
-    # log saved into
-    parser.add_argument(
-        '--log_dir', type=str, default=LOG_DIR,
-        help='TensorBoard log path')
-
-    FLAGS, _ = parser.parse_known_args()
-
-    if not os.path.exists(FLAGS.model_dir):
-        os.makedirs(FLAGS.model_dir)
-
-    if not os.path.exists(FLAGS.log_dir):
-        os.makedirs(FLAGS.log_dir)
 
     main()
